@@ -1,0 +1,264 @@
+$util = {
+  sizes: {
+    XXS: $gap
+     XS: $gap * 2
+      S: $gap * 4
+      M: $gap * 6
+      L: $gap * 8
+     XL: $gap * 10
+  }
+  hLine: {
+     '1': top
+     '2': middle
+    '21': baseline
+     '3': bottom
+  }
+  hAlign: {
+    '1': left
+    '2': center
+    '3': right
+  }
+  margin: {
+     m: margin
+    mx: margin-x
+    my: margin-y
+    mt: margin-top
+    mr: margin-right
+    mb: margin-bottom
+    ml: margin-left
+  }
+  padding: {
+     p: padding
+    px: padding-x
+    py: padding-y
+    pt: padding-top
+    pr: padding-right
+    pb: padding-bottom
+    pl: padding-left
+  }
+  auto: {
+    mx: margin-x
+    mr: margin-right
+    ml: margin-left
+  }
+  position: {
+    R: relative
+    A: absolute
+    F: fixed
+    S: static
+  }
+  center: {
+    X:  x
+    Y:  y
+    XY: xy
+  }
+  visibility: {
+    '0': hidden
+    '1': visible
+  }
+}
+
+
+.util
+
+  /* -----------------------------------
+    Horisontal align helper (inline-block flexbox analogue)
+  ----------------------------------- */
+  for key, value in $util.hLine
+    &-hLine--{key}
+      hLine: value
+
+
+  for key, value in $util.hAlign
+    &-hAlign--{key}
+      hAlign: value
+
+  /* -----------------------------------
+    Vertical & Horisontal gap helpers (uses size)
+  ----------------------------------- */
+
+  &-vGap--blocks
+    &>*
+      display block
+
+
+  for sizeName, sizeValue in $util.sizes
+
+    &-vGap--{sizeName}
+      vGap: unit(sizeValue, px)
+
+    &-hGap--{sizeName}
+      hGap: unit(sizeValue, px)
+
+
+
+    /* -----------------------------------
+      Margin & Padding helpers (uses size)
+    ----------------------------------- */
+
+    for shortcut, fullname in $util.margin
+      &-{shortcut}--{sizeName}
+        {fullname}: sizeValue
+
+
+    for shortcut, fullname in $util.padding
+      &-{shortcut}--{sizeName}
+        {fullname}: sizeValue
+
+
+  /* -----------------------------------
+    Width modifiers
+      - from 10% to 100%
+      - from 1/10 to 10/10 of 960
+  ----------------------------------- */
+  for num in 1..10
+    &-w--{num}
+      width: unit(num * 10, '%')
+
+
+  /* -----------------------------------
+    Margin Auto
+  ----------------------------------- */
+  for shortcut, fullname in $util.auto
+    &-{shortcut}--auto
+      display block
+      {fullname}: auto
+
+
+
+
+  /* -----------------------------------
+      Colors & Titles
+    ----------------------------------- */
+  // default-color
+  &-c
+    for k, v in $global.color
+      if v[1]
+        for color, num in v
+          &--{k}-{num}
+            color: color
+      else
+        &--{k}
+          color: v
+
+  // brand-color
+  &-bc
+    for k, v in $global.brand-color
+      &--{k}
+        color: v
+
+  // default title
+  &-t
+    for k, v in $global.title
+      &--{k}
+        font-size: v
+
+
+
+  /* -----------------------------------
+    Positioning & Centering
+  ----------------------------------- */
+  for key, value in $util.position
+    &-pos--{key}
+      position: value
+
+
+  for key, value in $util.center
+    &-ctr--{key}
+      ctr: value
+
+
+  /* -----------------------------------
+    Vibility
+  ----------------------------------- */
+  for key, value in $util.visibility
+    &-vsb--{key}
+      visibility: value
+
+
+  // /* -----------------------------------
+  //   Responsive Hiding
+  // ----------------------------------- */
+  // for bp, val in $global.breakpoints
+  //   &-hide--{bp}
+  //     +bp()
+  //       hide()
+
+  //   &-hide-min--{bp}
+  //     +min(val)
+  //       hide()
+
+  //   &-hide-max--{bp}
+  //     +max(val)
+  //       hide()
+
+
+  /* -----------------------------------
+    Simple utils
+  ----------------------------------- */
+  &-unit
+
+    &_strong
+    &_bold
+      font-weight: 500
+
+    // &_help_text
+    //   @extend .util-c--dark-2
+    //   @extend .util-t--XS
+
+    &_nowrap
+      white-space nowrap
+
+    &_ellipsis
+      ellipsis()
+      max-width 100%
+
+    &_clickable
+      pressable()
+      cursor: pointer
+
+    &_noscroll
+      overflow hidden
+
+    &_nopseudo
+      &:before
+      &:after
+        display none
+        
+    &_pseudo_hidden
+      absolute top left -9999px
+      backface-visibility: hidden
+      
+
+/* -----------------------------------
+  Setup mixin
+----------------------------------- */
+utilSetup(config = {})
+  
+  if config.hGap in keys($util.sizes)
+    hGap: $util.sizes[config.hGap]
+
+  if config.vGap in keys($util.sizes)
+    vGap: $util.sizes[config.vGap]
+
+  if config.box
+    for k, v in config.box
+      if k in keys($util.margin)
+        prop = $util.margin[k]
+        {prop}: $util.sizes[v]
+      if k in keys($util.padding)
+        prop = $util.padding[k]
+        {prop}: $util.sizes[v] 
+  
+
+utilRespSetup(config = {}, mobile-first = true)
+  for name, cfg in config
+    if $bp[name] and cfg
+      if mobile-first
+        +min($bp[name])
+          utilSetup(cfg)
+      else 
+        +max($bp[name])
+          utilSetup(cfg)
+
+  

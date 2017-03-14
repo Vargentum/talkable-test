@@ -1,0 +1,742 @@
+/*------------------------------------------------------
+  Mixins from NIB library
+------------------------------------------------------*/
+border(color, args...)
+  if color is a 'color'
+    border: 1px solid color args
+  else
+    border: arguments
+
+
+size()
+  if length(arguments) == 1
+    width: arguments[0]
+    height: arguments[0]
+  else
+    width: arguments[0]
+    height: arguments[1]
+
+
+-pos(type, args)
+  i = 0
+  position: unquote(type)
+  for j in (1..4)
+    if length(args) > i
+      {args[i]}: args[i + 1] is a 'unit' ? args[i += 1] : 0
+    i += 1
+
+fixed()
+  -pos('fixed', arguments)
+
+absolute()
+  -pos('absolute', arguments)
+
+relative()
+  -pos('relative', arguments)
+
+
+trim-text()
+  overflow hidden
+  text-overflow ellipsis
+
+
+ellipsis($type = block, $multiline = false)
+  display $type
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
+  if $multiline
+    white-space normal
+    display -webkit-box
+    -webkit-box-orient vertical  
+    -webkit-line-clamp $multiline
+
+
+hide-text()
+  text-indent: 101%
+  white-space: nowrap
+  overflow: hidden
+
+
+clearfix()
+  &:before
+  &:after
+    content: ""
+    display: table
+  &:after
+    clear: both
+    
+
+
+
+
+/*------------------------------------------------------
+  Resets
+------------------------------------------------------*/
+reset-box()
+  margin: 0
+  padding: 0
+  
+reset-font()
+  font: inherit
+
+reset-list()
+  reset-box()
+  list-style-type none
+
+reset-btn()
+  reset-box()
+  border: none
+  background: none
+
+/*------------------------------------------------------
+  Other mixins
+------------------------------------------------------*/
+hGap(gutter)
+  margin-left: -(gutter)
+  &>*
+    display: inline-block
+    margin-left: gutter
+
+hAlign(align = left)
+  text-align: align
+  &>*
+    display inline-block
+    
+
+hLine(align = baseline)
+  &>*
+    display inline-block
+    vertical-align: align
+
+
+hLineGap(align = baseline, gutter)
+  hLine: align
+  if gutter
+    hGap: gutter
+
+
+vGap()
+  gap = arguments[0]
+  reversed = arguments[1] || false
+  pos = reversed ? first : last
+  &>*
+    margin-bottom: gap
+    &:{pos}-child
+      margin-bottom: 0
+
+yGap()
+  vGap(arguments)
+
+xGap()
+  gap = arguments[0]
+  reversed = arguments[1] || false
+  pos = reversed ? first : last
+  &>*
+    margin-right: gap
+    &:{pos}-child
+      margin-right: 0
+
+
+ctr-at()
+  display flex
+  justify-content center
+  align-items center
+
+ctr-at-size()
+  ctr-at()
+  size arguments
+
+
+ctr(pos = xy, transforms...)
+  position absolute
+
+  if pos == xy
+    top: 50%
+    left 50%
+    transform translate(-50%, -50%) transforms
+
+  else if pos == y
+    top: 50%
+    transform translateY(-50%) transforms
+
+  else if pos == x
+    left: 50%
+    transform translateX(-50%) transforms
+
+  else if pos == none
+    position static
+    transform none
+
+
+p-ctr(pos = xy, transforms...)
+  content ''
+  display block
+  ctr(pos, transforms)
+
+
+pb()
+  content: ''
+  display: block
+  absolute: arguments
+
+pi($align = auto)
+  content: ''
+  display: inline-block
+  vertical-align $align
+
+
+add-radius($dir, $r = 4px)
+  if $dir == top
+    border-top-left-radius $r
+    border-top-right-radius $r
+    
+  else if $dir == bottom
+    border-bottom-left-radius $r
+    border-bottom-right-radius $r
+
+  else if $dir == left
+    border-top-left-radius $r
+    border-bottom-left-radius $r
+
+  else if $dir == right
+    border-top-right-radius $r
+    border-bottom-right-radius $r
+
+  else
+    border-radius $r
+    
+
+rm-radius($dir)
+  if $dir == top
+    border-top-left-radius 0
+    border-top-right-radius 0
+    
+  else if $dir == bottom
+    border-bottom-left-radius 0
+    border-bottom-right-radius 0
+
+  else if $dir == left
+    border-top-left-radius 0
+    border-bottom-left-radius 0
+
+  else if $dir == right
+    border-top-right-radius 0
+    border-bottom-right-radius 0
+
+  else
+    border-radius 0
+    
+    
+
+group-radius($dir, $rad = $radius, $pseudo = false)
+  mk-radius($sel0 = unquote('&'), $sel1 = unquote('&:first-child'), $sel2 = unquote('&:last-child'))
+    {$sel0}
+      border-radius 0
+      
+    if $dir is y
+      {$sel1}
+        border-top-left-radius $rad
+        border-top-right-radius $rad
+        
+      {$sel2}
+        border-bottom-left-radius $rad
+        border-bottom-right-radius $rad
+        
+    if $dir is x
+      {$sel1}
+        border-top-left-radius $rad
+        border-bottom-left-radius $rad
+        
+      {$sel2}
+        border-top-right-radius $rad
+        border-bottom-right-radius $rad
+       
+
+  if $pseudo is 'before'
+    mk-radius(unquote('&:before'), unquote('&:first-child:before'), unquote('&:last-child:before'))
+
+  if $pseudo is 'after'
+    mk-radius(unquote('&:after'), unquote('&:first-child:after'), unquote('&:last-child:after'))
+
+  else
+    mk-radius()
+
+/*------------------------------------*\
+    Retina support mixins
+\*------------------------------------*/
+retina()
+  @media (-webkit-min-device-pixel-ratio: 2), 
+         (min-resolution: 192dpi)
+    {block}
+
+/*------------------------------------*\
+  Quick image insert
+\*------------------------------------*/
+img-x1(full-name, position = '50% 50%', repeat = no-repeat)
+  background-image: url('/img/' + full-name)
+  background-repeat repeat
+  background-position unquote(position)
+  
+img-x2(full-name, position = '50% 50%', repeat = no-repeat)
+  img-x1(full-name, position, repeat)
+  +retina()
+    ext = extname(full-name)
+    name = basename(full-name, ext) + '@2x'
+    dir = dirname(full-name)
+    dir-name = pathjoin(dir, name)
+    background-image: url('/img/' + dir-name + ext)
+
+img-size()
+  size arguments
+  if arguments[1]
+    background-size arguments[0] arguments[1]
+  else
+    background-size arguments[0] arguments[0]
+
+
+link-solid-color($clr = $brand-c)
+  &,&:hover,&:focus,&:visited
+    color $clr    
+
+link-colors(def = inherit, hov = $global.color.secondary)
+  &,&:visited
+    color: def
+  &:hover,&:focus
+    color: hov
+
+
+brand-link-cfg = {
+  default: $global.color.brand 
+  hover: $global.color.link
+  border-type: solid
+}
+
+brand-link(user-cfg = {})
+  config = merge({}, brand-link-cfg, user-cfg)
+
+  position: relative
+  trans color
+  cursor: pointer
+  color: config.default
+  line-height: 1.5
+
+  &:after
+    trans opacity
+    pb left right bottom 0
+    border-bottom: 1px config.border-type config.default
+    opacity 0
+
+  &:hover,&:focus
+    color: config.hover
+    &:after
+      border-color: config.hover
+      opacity 1
+
+
+
+text-hide()
+  font: 0/0 serif
+  text-shadow: none
+  color: transparent
+  if arguments[0] == none
+    font:  $base-f-size/$base-f-height $base-f
+    color: inherit
+
+pressable($deep = 1px, $pos = relative)
+  if $deep is false
+    $deep = 0
+
+  position: $pos
+  &:active
+    if $pos is absolute or $pos is fixed
+      margin-top: $deep
+    if $pos is relative
+      top: $deep
+
+
+title($size, $color = $brand-c)
+  font $size $brand-f
+  color: $color
+
+button-font(fz)
+  font: 700 fz $global.family.button
+  letter-spacing: 1px 
+  text-transform: uppercase
+
+no-hlt()
+  user-select: none
+
+
+trans($prop = all, $dur = $global.transition)
+  transition-property $prop
+  transition-duration $dur
+  if $prop == none
+    transition none
+
+
+test($color = red)
+  border $color !important
+
+show()
+  visibility visible !important
+  if arguments[0] == relative
+    position relative !important
+  else
+    position static !important
+
+hide()
+  position absolute !important
+  visibility hidden !important
+
+make-visible()
+  visibility visible
+  opacity 1
+
+make-hidden()
+  visibility hidden
+  opacity 0
+
+placeholder($color){
+  &::-webkit-input-placeholder {color: $color}
+  &:-moz-placeholder           {color: $color}
+  &::-moz-placeholder          {color: $color}
+  &:-ms-input-placeholder      {color: $color}
+}
+
+add-dnd-cursors()
+  /* autoprefixer: off */
+  cursor: -webkit-grab
+  cursor:    -moz-grab
+  cursor:         grab
+  
+  &.is-move
+    /* autoprefixer: off */
+    cursor: -webkit-grabbing
+    cursor:    -moz-grabbing
+    cursor:         grabbing
+      
+
+/*--------------------------------------
+  XY axis helpers
+--------------------------------------*/
+-xy(prop1, prop2, args)
+  {prop1} args[0]
+  if args[1]
+    {prop2} args[1]
+  else 
+    {prop2} args[0]
+
+
+margin-x()
+  -xy(margin-right, margin-left, arguments)
+
+margin-y()
+  -xy(margin-top, margin-bottom, arguments)
+
+padding-x()
+  -xy(padding-right, padding-left, arguments)
+
+padding-y()
+  -xy(padding-top, padding-bottom, arguments)
+  
+/* works fine with border() mixin */
+border-x()
+  if arguments == none
+    -xy(border-right, border-left, arguments)
+
+border-y()
+  if arguments == none
+   -xy(border-top, border-bottom, arguments)
+
+// avoid FF border-bug https://bugzilla.mozilla.org/show_bug.cgi?id=890383
+repair-ff-table-border()
+
+  .firefox &
+    border-collapse separate
+
+  .firefox & td
+  .firefox & th
+    border-bottom-width 0
+    border-right-width  0
+      
+    &:last-child
+      border-right-width 1px
+
+  //* - tbody, tfoot, thead
+  .firefox & > *:last-child tr:last-child td
+  .firefox & > *:last-child tr:last-child th
+    border-bottom-width 1px
+
+
+/*------------------------------------*\
+  Clickable
+\*------------------------------------*/
+make-clickable($clr = $grey-dark, $clr-active = $grey-darkest, $pos = relative)  
+  pressable 1px $pos
+  cursor pointer
+  trans color
+  color $clr
+  
+  &:hover
+  &.is-active
+    color $clr-active
+    
+  &.is-active
+    pressable 0 $pos
+    cursor default
+
+
+
+make-mask($gap = 0)
+  absolute left $gap top $gap right $gap bottom $gap
+
+
+/*------------------------------------*\
+  OLD ie support
+\*------------------------------------*/
+old-ie()
+  .msie9 &
+  .msie8 &
+    {block}
+  
+    
+/*------------------------------------*\
+  responsive mixins for login page
+\*------------------------------------*/ 
+
+b()
+  if arguments[1]
+    condition = s('only screen and (%s) and (%s)', unquote(arguments[0]), unquote(arguments[1]) )
+  else
+    condition = s('only screen and (%s)', unquote(arguments[0]) )
+  @media condition
+    {block}   
+    
+max(bp)
+  condition = 'only screen and (max-width: %s)' % ($global.breakpoints[s('%s', bp)] or bp)
+  @media condition
+    {block}
+ 
+min(bp)
+  condition = 'only screen and (min-width: %s)' % ($global.breakpoints[s('%s', bp)] or bp)
+  @media condition
+    {block}  
+    
+h-max(bp)
+  condition = 'only screen and (max-height: %s)' % ($global.breakpoints[s('%s', bp)] or bp)
+  @media condition
+    {block}
+
+h-min(bp)
+  condition = 'only screen and (min-height: %s)' % ($global.breakpoints[s('%s', bp)] or bp)
+  @media condition
+    {block}      
+
+
+// r-prop(props...)
+//   for name, value in $global.breakpoints
+//     test()    
+
+
+/*
+  Bootstrap inspired breakpoint ranges
+
+  lg  - large      (1200px and higher)
+  md  - middle     (from 960 to 1200)
+  sm  - small      (from 768 to 960)
+  xs  - iphone height (from 480 to 768)
+  xxs - iphone width  (320px to 480)
+*/
+
+lg()
+  +min(lg)
+    {block}
+
+md()
+  +b('min-width:'+$bp.md 'max-width:'+ $bp.lg)
+    {block}
+
+sm()
+  +b('min-width:'+$bp.sm 'max-width:'+$bp.md)
+    {block}
+
+xs()
+  +b('min-width:'+$bp.xs 'max-width:'+$bp.sm)
+    {block}
+
+xxs()
+  +max(xxs)
+    {block}
+
+
+fix-content-sizing-flexbox-safari-bug()
+  //fix for this bug https://github.com/philipwalton/flexbugs#1-minimum-content-sizing-of-flex-items-not-honored
+  .safari &
+    flex-shrink 0
+    flex-basis auto
+
+
+
+set-input-state(state)
+  border-color: $global.color[state]
+  background: lighten($global.color[state], 95%)
+  color: $global.color[state]
+
+
+
+circle(size, centerContent = true)
+  border-radius: 50%
+  if centerContent
+    ctr-at-size: size
+  else
+    width: size //weird: size doesn't work!
+    height: size
+    
+
+custom-cursor(type)
+  config = $global.cursor[type]
+  -no-retina-cursor()
+    cursor: s('url("../img/cursors/%s.png")', type) config.shift, config.fallback
+
+  if config.noRetina
+    -no-retina-cursor()
+  else
+    cursor: -webkit-image-set( 
+      s('url("../img/cursors/%s.png")', type) 1x
+    , s('url("../img/cursors/%s@2x.png")', type) 2x 
+    ) config.shift, config.fallback
+
+  .firefox & 
+  .ie &
+    -no-retina-cursor()
+
+
+
+// add-glyph(icon, font = universal)
+//   @extend {$global.selector.glyph}--{font}-glyphs
+//   @extend {$global.selector.glyph}--{font}-glyphs--{icon}
+
+
+apply(object) 
+  o = object
+  {o}
+
+apply-prop(k, v...)
+  {k}: v
+
+
+create-mods-from(hash)
+  for mod, styles in hash
+    &--{mod}
+      {styles}
+
+extend-types-with-glyphs(hash)
+  for type, glyph-data in hash
+    &.type-{type}
+      add-glyph: glyph-data
+  
+
+states()
+  if arguments[0] is 'all'
+    &,&:hover,&:focus,&:active
+      {block}
+  else 
+    for state in arguments
+      &:{state}
+        {block}
+
+
+extend-mods(selector, mods...)
+  for mod in (mods)
+    @extend {selector + '--' + mod}
+
+
+extend-flex(mods...)
+  for mod in (mods)
+    @extend {'.' + $global.namespace.flex-tools + '-' + mod}
+
+extend-utils(mods...)
+  for mod in (mods)
+    @extend {'.' + $global.namespace.utils + '-' + mod}
+
+.test
+  test()
+  
+fill-scrollable()
+  flex: 1 1 auto
+  height 0
+  overflow-y: auto
+  
+
+
+/* -----------------------------
+  Responsive props   
+----------------------------- */
+def-cfg = {
+  unit: px
+}
+r-prop(prop, data, cfg = {})
+  config = merge({}, def-cfg, cfg)
+  for k,v in data
+    +min($bp[k])
+      {prop}: unit(v, config.unit)
+
+r-props(descriptor, cfg = {})
+  for k,v in descriptor
+    r-prop(k, v, cfg)
+
+
+
+
+negative-pseudo(pos = relative)
+  position: pos
+  z-index: 1
+  &:before
+  &:after
+    z-index: -1
+
+
+line-through()
+  position relative
+  &:after
+    p-ctr y
+    left 0
+    right 0
+    border-top: arguments
+    
+
+break-inside-legacy()
+  display inline-block
+  vertical-align: top
+  width 100%
+
+
+forApple()
+  .safari &, .ios &
+    {block}
+    
+
+textLikeInput()
+  border-color: transparent
+  background: transparent
+  background-color: transparent
+  cursor: default
+  box-shadow: none
+  
+
+
+
+/* -----------------------------
+  Improved helpers to escape css-modules `:global` keyword from selectors
+----------------------------- */
+ctx()
+  return replace(':global ', '', selector())
+
+beat-priority(num = 1, this = ctx())
+  selector = ''
+  for i in range(1,num)
+    selector += this
+  &{selector}
+    {block}

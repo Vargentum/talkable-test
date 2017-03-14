@@ -1,0 +1,23 @@
+@import 'utils/settings';
+@import 'utils/mixins';
+
+:global
+  @import 'utils/utils';
+
+  html
+    box-sizing: border-box;
+
+  html
+  body
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-size: 20px;
+    overflow: initial !important // prevent window scroll events disabling
+
+  *
+  *:before
+  *:after
+    box-sizing: inherit;
+
+
